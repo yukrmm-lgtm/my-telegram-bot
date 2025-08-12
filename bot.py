@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 # Настройки
-TOKEN = 8235892772:AAEUSJHCF_eUBkJtS3gUdRHbRQIf6W7HfiU  # ← Замените здесь!
+TOKEN = "8235892772:AAEUSJHCF_eUBkJtS3gUdRHbRQIf6W7HfiU"  # ← Замените здесь!
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Команда /start

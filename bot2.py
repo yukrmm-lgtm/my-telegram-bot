@@ -92,13 +92,14 @@ async def show_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 def main():
-    # Важно: создаем Application с правильными параметрами
-    application = Application.builder() \
-        .token(TOKEN) \
-        .http_version("1.1") \  # Явно указываем версию HTTP
-        .get_updates_http_version("1.1") \
+ # Создаем Application с правильными параметрами (без лишних обратных слешей)
+    application = (
+        Application.builder()
+        .token(TOKEN)
+        .http_version("1.1")  # Явно указываем версию HTTP
+        .get_updates_http_version("1.1")
         .build()
-
+    )
     # Обработчики
     handlers = [
         CommandHandler("list_commands", list_commands),

@@ -1,35 +1,25 @@
-import logging
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackContext
-from telegram.ext import filters  # Вместо Filters
+from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes
+from telegram.ext import filters
 
-# Настройки
-TOKEN = "8235892772:AAEUSJHCF_eUBkJtS3gUdRHbRQIf6W7HfiU"  # ← Замените здесь!
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+TOKEN = "ВАШ_ТОКЕН"  # Замените на реальный токен
 
-# Команда /start
-def start(update: Update, context: CallbackContext):
-    update.message.reply_text('Привет! Я твой первый бот 🤖\nОтправь /help для помощи!')
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text('Привет! Я твой бот!')
 
-# Команда /help
-def help(update: Update, context: CallbackContext):
-    update.message.reply_text('Просто напиши что-нибудь, и я повторю!')
+async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(f"Вы сказали: {update.message.text}")
 
-# Ответ на сообщения
-def echo(update: Update, context: CallbackContext):
-    update.message.reply_text(f"Ты сказал: {update.message.text}")
-
-# Запуск
 def main():
-    updater = Updater(TOKEN)
-    dispatcher = updater.dispatcher
+    # Создаем Application вместо Updater
+    application = Application.builder().token(TOKEN).build()
     
-    dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(CommandHandler("help", help))
-    dispatcher.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+    # Добавляем обработчики
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
     
-    updater.start_polling()
-    updater.idle()
+    # Запускаем бота
+    application.run_polling()
 
 if __name__ == '__main__':
     main()

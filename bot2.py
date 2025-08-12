@@ -78,24 +78,28 @@ async def update_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text=f"Ошибка обновления: {str(e)}"
         )
 
-async def show_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def get_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
-    if chat_id not in group_members:
-        await update.message.reply_text("Сначала используйте /update_members")
+    
+    # Проверяем, что это группа/супергруппа
+    if chat_id > 0:
+        await update.message.reply_text("Эта команда работает только в группах!")
         return
 
-    members_list = []
-    for user_id in list(group_members[chat_id])[:100]:  # Ограничиваем вывод
-        try:
-            user = await context.bot.get_chat_member(chat_id, user_id)
-            name = user.user.full_name
-            members_list.append(f"👤 {name}")
-        except:
-            members_list.append(f"👤 ID:{user_id}")
-
-    await update.message.reply_text(
-        f"Участники ({len(members_list)}):\n" + "\n".join(members_list)
-    )
+    try:
+        await context.bot.send_chat_action(chat_id, ChatAction.TYPING)
+        members = []
+        
+        # Новый способ получения участников
+        async for member in context.bot.get_chat_member_count(chat_id):
+            user = member.user
+            members.append(f"{user.full_name} (@{user.username or 'нет'})")
+        
+        await update.message.reply_text(
+            f"Участники группы ({len(members)}):\n" + "\n".join(members)
+        )
+    except Exception as e:
+        await update.message.reply_text(f"Ошибка: {str(e)}")
 
 def main():
  # Создаем Application с правильными параметрами (без лишних обратных слешей)
@@ -109,7 +113,7 @@ def main():
     # Обработчики
     handlers = [
         CommandHandler("list_commands", list_commands),
-        CommandHandler("members", show_members),
+        CommandHandler("members", get_chat_members),
         CommandHandler("update_members", update_members),
         MessageHandler(filters.TEXT & ~filters.COMMAND, echo)
     ]

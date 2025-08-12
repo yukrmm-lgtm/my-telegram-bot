@@ -23,37 +23,32 @@ async def list_commands(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def update_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
-    if chat_id > 0:  # Это личный чат, а не группа
+    if chat_id > 0:
         await update.message.reply_text("Эта команда работает только в группах!")
         return
 
     try:
-        # Получаем текущих участников
         current_members = set()
-        async for member in context.bot.get_chat_members(chat_id):
-            if member.status not in [ChatMemberStatus.LEFT, ChatMemberStatus.KICKED]:
-                current_members.add(member.user.id)
+        # Новый способ получения участников
+        async with context.bot as bot:
+            async for member in bot.get_chat_members(chat_id):
+                if member.status not in [ChatMemberStatus.LEFT, ChatMemberStatus.KICKED]:
+                    current_members.add(member.user.id)
 
-        # Обновляем хранилище
-        if chat_id not in group_members:
-            group_members[chat_id] = set()
-        
-        added = current_members - group_members[chat_id]
-        removed = group_members[chat_id] - current_members
+        old_members = group_members.get(chat_id, set())
         group_members[chat_id] = current_members
+        save_db(group_members)
 
-        # Формируем отчет
-        report = f"✅ Список участников обновлен:\n"
-        report += f"👥 Всего участников: {len(current_members)}\n"
-        if added:
-            report += f"➕ Добавлены: {len(added)}\n"
-        if removed:
-            report += f"➖ Удалены: {len(removed)}\n"
+        report = f"✅ Список обновлен\n👥 Участников: {len(current_members)}"
+        if added := current_members - old_members:
+            report += f"\n➕ Новые: {len(added)}"
+        if removed := old_members - current_members:
+            report += f"\n➖ Ушли: {len(removed)}"
         
         await update.message.reply_text(report)
     except Exception as e:
-        await update.message.reply_text(f"Ошибка: {e}")
-
+        await update.message.reply_text(f"Ошибка: {str(e)}")
+        
 async def show_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     if chat_id not in group_members or not group_members[chat_id]:

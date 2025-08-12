@@ -17,13 +17,19 @@ DB_FILE = 'members_db.json'
 # Инициализация БД
 def load_db():
     if os.path.exists(DB_FILE):
-        with open(DB_FILE, 'r') as f:
-            return {int(k): set(v) for k, v in json.load(f).items()}
+        try:
+            with open(DB_FILE, 'r') as f:
+                data = f.read()
+                if not data.strip():  # Если файл пустой
+                    return {}
+                return {int(k): set(v) for k, v in json.loads(data).items()}
+        except (json.JSONDecodeError, KeyError):
+            return {}
     return {}
 
 def save_db(data):
     with open(DB_FILE, 'w') as f:
-        json.dump({k: list(v) for k, v in data.items()}, f)
+        json.dump({str(k): list(v) for k, v in data.items()}, f, indent=2)
 
 group_members = load_db()
 
@@ -117,4 +123,7 @@ def main():
     )
 
 if __name__ == '__main__':
+    # Создаем файл если его нет
+    if not os.path.exists(DB_FILE):
+        save_db({})
     main()

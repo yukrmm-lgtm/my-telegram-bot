@@ -9,6 +9,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"Вы сказали: {update.message.text}")
+    
+# Добавьте эту функцию
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    help_text = """
+    Доступные команды:
+    /start - Начать работу
+    /help - Помощь
+    /command1 - Описание команды 1
+    /command2 - Описание команды 2
+    """
+    await update.message.reply_text(help_text)
+
+# При создании Application добавьте хендлер
+application.add_handler(CommandHandler("help", help_command))
 
 def main():
     # Создаем Application вместо Updater

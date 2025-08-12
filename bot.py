@@ -21,9 +21,6 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     await update.message.reply_text(help_text)
 
-# При создании Application добавьте хендлер
-application.add_handler(CommandHandler("help", help_command))
-
 def main():
     # Создаем Application вместо Updater
     application = Application.builder().token(TOKEN).build()
@@ -31,6 +28,7 @@ def main():
     # Добавляем обработчики
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+    application.add_handler(CommandHandler("help", help_command))
     
     # Запускаем бота
     application.run_polling()
